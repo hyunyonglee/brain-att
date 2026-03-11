@@ -1,0 +1,18 @@
+venv/
+__pycache__/
+*.pyc
+Data/
+Results/
+Figures/
+Brainstorming/
+References/
+*.zip
+.claude/
+
+# S1 data (large, unused)
+*_S1_*.dat
+*_S1.des
+
+# ATT examples other than BrainRest
+AdaptiveTensorTree/att_examples/*/
+!AdaptiveTensorTree/att_examples/BrainRest/
