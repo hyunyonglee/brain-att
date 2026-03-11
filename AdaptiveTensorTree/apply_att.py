@@ -27,7 +27,6 @@
 
 import math
 import numpy as np
-import born_machine
 import argparse
 import os
 import time
@@ -187,6 +186,17 @@ if "dtype" in data_description:
     data_dtype = data_description["dtype"]
 else:
     data_dtype = "f4"
+if "q" in data_description:
+    q_state = int(data_description["q"])
+else:
+    q_state = 2  # backward compatible default
+
+# import born_machine (use qstate fork for q>2)
+if q_state > 2:
+    import born_machine_qstate as born_machine
+else:
+    import born_machine
+
 # load born machine and data
 if os.path.isfile(args.dir + "/" + BASE_ID + ".pickle"):
     with open(args.dir + "/" + BASE_ID + ".pickle", "rb") as f:
@@ -195,7 +205,7 @@ if os.path.isfile(args.dir + "/" + BASE_ID + ".pickle"):
             bm.dir = args.dir
         rng = np.random.default_rng(args.SEED)
         sample_data = np.fromfile(sample_file, dtype=data_dtype)
-        sample_data = np.reshape(sample_data, (-1, image_size, 2))
+        sample_data = np.reshape(sample_data, (-1, image_size, q_state))
         sample_data = torch.tensor(sample_data)
         if args.batch:
             bm.batch_data = sample_data
@@ -209,7 +219,7 @@ else:
     rng = np.random.default_rng(args.SEED)
     # set data
     sample_data = np.fromfile(sample_file, dtype=data_dtype)
-    sample_data = np.reshape(sample_data, (-1, image_size, 2))
+    sample_data = np.reshape(sample_data, (-1, image_size, q_state))
     sample_data = torch.tensor(sample_data)
     if not args.batch:
         nunits = max(int(sample_data.shape[0] / args.NSAMPLE), 1)
@@ -259,13 +269,16 @@ else:
     else:
         GTYPE = args.TYPE
 
+    bm_kwargs = {}
+    if q_state > 2:
+        bm_kwargs['q_state'] = q_state
     if args.gpu:
         bm = born_machine.binary_tree(
-            image_size, GTYPE, BASE_ID, args.dir, args.XSEED, "cuda"
+            image_size, GTYPE, BASE_ID, args.dir, args.XSEED, "cuda", **bm_kwargs
         )
     else:
         bm = born_machine.binary_tree(
-            image_size, GTYPE, BASE_ID, args.dir, args.XSEED, "cpu"
+            image_size, GTYPE, BASE_ID, args.dir, args.XSEED, "cpu", **bm_kwargs
         )
     # Which is a better initialization?
     if args.STRATEGY == 1 or args.STRATEGY == 2 or args.STRATEGY == 3:
@@ -285,7 +298,7 @@ else:
 
 # load test data
 test_data = np.fromfile(test_file, dtype=data_dtype)
-test_data = np.reshape(test_data, (-1, image_size, 2))
+test_data = np.reshape(test_data, (-1, image_size, q_state))
 test_data = torch.tensor(test_data)
 
 
