@@ -8,11 +8,9 @@ Brainstorming/
 References/
 *.zip
 .claude/
+docs/
+AdaptiveTensorTree/
 
 # S1 data (large, unused)
 *_S1_*.dat
 *_S1.des
-
-# ATT examples other than BrainRest
-AdaptiveTensorTree/att_examples/*/
-!AdaptiveTensorTree/att_examples/BrainRest/
